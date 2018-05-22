@@ -1,0 +1,75 @@
+Notes for installing ISCE 2.1.0 (on Ubuntu) using Anaconda3
+Modified from Scott’s notes
+Last update 05/2018
+
+Download ISCE to location where you want to keep the source code:
+cd $HOME/software
+wget --uname=???? --password=???? https://imaging.unavco.org/software/ISCE/isce-2.1.0.tar.bz2
+tar xvjf isce-2.1.0.tar.bz2
+
+A list of ubuntu packages that need to be installed (if they aren't already):
+apt-get install libgmp-dev libmpfr-dev libmpc-dev libc6-dev-i386
+apt-get install gfortran
+apt-get install gcc
+apt-get install curl
+
+ISCE requires Python2 to install (for scons library) and Python3 to run. Use Anaconda Python installations for this:
+Download anaconda3:
+Wget https://repo.anaconda.com/archive/Anaconda3-5.1.0-Linux-x86_64.sh
+sh Anaconda3-5.1.0-Linux-x86_64.sh
+In this tutorial, I’m saving anaconda3 here:
+        $HOME/software/anaconda3
+Make sure you source the above path in .bashrc file.
+Make a new conda environment for isce. this environment will have all of the right python dependencies in it that we need for isce.
+       conda create --name isce-2.1.0
+Make a new conda environment for the isce install with scons
+       conda create --name scons
+
+Install required python modules:
+source activate scons 
+conda install scons
+
+source activate isce-2.1.0
+conda install krb5
+conda install gdal
+conda install hdf5
+conda install libgdal
+conda install -c omnia fftw3f=3.3.4
+conda install scipy
+
+Update ISCE configuration file (here is an example template):
+ vi $HOME/.isce/SConfigISCE
+PRJ_SCONS_BUILD=$HOME/software/isce-2.1.0/build
+PRJ_SCONS_INSTALL=$HOME/software/isce-2.1.0/isce
+LIBPATH=$HOME/anaconda3/envs/isce-2.1.0/lib /usr/lib/x86_64-linux-gnu
+CPPPATH=$HOME/anaconda3/envs/isce-2.1.0/include/python3.6m
+FORTRANPATH=/usr/include
+FORTRAN=/usr/bin/gfortran
+CC=/usr/bin/gcc
+CXX=/usr/bin/g++
+MOTIFLIBPATH=/usr/lib/x86_64-linux-gnu 
+X11LIBPATH=/usr/lib/x86_64-linux-gnu  
+MOTIFINCPATH=/usr/include/Xm    
+X11INCPATH=/usr/include/X11  
+
+Install ISCE with scons (example as root to install to /usr/local)
+cd $HOME/software/isce-2.1.0
+export PYTHONPATH=$HOME/software/isce-2.1.0/configuration
+export SCONS_CONFIG_DIR=$HOME/.isce
+source activate scons (this changes us to the scons conda environment so we have python2.7 for the install
+scons install (watch for errors here to see if you missed any libraries/dependencies)
+
+
+Create an alias in .bashrc to activate Python3 whenever you want to run isce 
+alias start_isce="source activate isce-2.1.0; source $HOME/.isce/.isceenv_201805" Where .isceenv_201609 contains:
+export ISCE_ROOT=$HOME/software/isce-2.1.0
+export ISCE_HOME=$ISCE_ROOT/isce
+export PATH=$ISCE_HOME/bin:$ISCE_HOME/applications:$PATH
+export PYTHONPATH=$ISCE_ROOT:$ISCE_HOME/applications:$ISCE_HOME/component
+
+
+To Run ISCE:
+Source $HOME/.bashrc
+start_isce
+insarApp.py --steps
+
